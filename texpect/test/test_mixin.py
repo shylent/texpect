@@ -1,18 +1,19 @@
 """
 @author: shylent
 """
-from texpect import TExpect, EOFReached, OutOfSequenceError, \
-    ConnectionAlreadyClosed, Expect, RequestInterruptedByConnectionLoss, \
-    RequestTimeout
+from texpect.errors import (EOFReached, OutOfSequenceError, 
+    ConnectionAlreadyClosed, RequestInterruptedByConnectionLoss, RequestTimeout)
+from texpect.mixin import Expect, ExpectMixin
 from twisted.internet import reactor
 from twisted.test.proto_helpers import StringTransportWithDisconnection
 from twisted.trial import unittest
 import re
 
+
 class ProcessBufferTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.t = TExpect()
+        self.t = ExpectMixin()
         self.t._buf = 'foobar'
     
     def test_single_pattern(self):
@@ -31,7 +32,7 @@ class ProcessBufferTestCase(unittest.TestCase):
 class ReadLazyTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.t = TExpect()
+        self.t = ExpectMixin()
         self.t.transport = StringTransportWithDisconnection()
         self.t.transport.protocol = self.t
         
@@ -80,7 +81,7 @@ class ReadLazyTestCase(unittest.TestCase):
 class ReadAllTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.t = TExpect()
+        self.t = ExpectMixin()
         self.t.transport = StringTransportWithDisconnection()
         self.t.transport.protocol = self.t
     
@@ -136,7 +137,7 @@ class ReadAllTestCase(unittest.TestCase):
 class ExpectTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.t = TExpect()
+        self.t = ExpectMixin()
         self.t.transport = StringTransportWithDisconnection()
         self.t.transport.protocol = self.t
 
@@ -191,7 +192,7 @@ class ExpectTestCase(unittest.TestCase):
         self.t._buf = 'foobar'
         d = self.t.expect(['baz'])
         self.failIf(d.called)
-        reactor.callLater(0.5, self.t.applicationDataReceived, 'bazspam')
+        reactor.callLater(0.5, self.t.expectDataReceived, 'bazspam')
         def cb(res):
             (ind, data) = (res[0], res[2])
             self.assertEqual(ind, 0)
@@ -205,7 +206,7 @@ class ExpectTestCase(unittest.TestCase):
         self.t._buf = 'foobar'
         d = self.t.expect(['spam'])
         self.failIf(d.called)
-        reactor.callLater(0.5, self.t.applicationDataReceived, 'baz')
+        reactor.callLater(0.5, self.t.expectDataReceived, 'baz')
         def check():
             self.assertIsInstance(self.t.promise, Expect)
             self.assertEqual(self.t._buf, 'foobarbaz')
@@ -255,7 +256,7 @@ class ExpectTestCase(unittest.TestCase):
 class ReadUntilTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.t = TExpect()
+        self.t = ExpectMixin()
         self.t.transport = StringTransportWithDisconnection()
         self.t.transport.protocol = self.t
     
@@ -273,7 +274,7 @@ class ReadUntilTestCase(unittest.TestCase):
         self.t._buf = 'foobar'
         d = self.t.read_until('baz')
         self.failIf(d.called)
-        reactor.callLater(0.5, self.t.applicationDataReceived, 'bazspam')
+        reactor.callLater(0.5, self.t.expectDataReceived, 'bazspam')
         def cb(res):
             self.assertEqual(res, 'foobarbaz')
             self.assertEqual(self.t._buf, 'spam')
@@ -294,7 +295,7 @@ class ReadUntilTestCase(unittest.TestCase):
 class WriteTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.t = TExpect()
+        self.t = ExpectMixin()
         self.t.transport = StringTransportWithDisconnection()
         self.t.transport.protocol = self.t
     
