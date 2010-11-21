@@ -1,7 +1,7 @@
 """
 @author: shylent
 """
-from texpect.errors import (EOFReached, OutOfSequenceError, 
+from texpect.errors import (EOFReached, OutOfSequenceError,
     ConnectionAlreadyClosed, RequestInterruptedByConnectionLoss, RequestTimeout)
 from texpect.mixin import Expect, ExpectMixin
 from twisted.internet import reactor
