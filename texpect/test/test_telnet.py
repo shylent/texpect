@@ -4,8 +4,7 @@
 from texpect.protocols import TelnetExpect
 from twisted.internet.protocol import Protocol, ServerFactory, ClientCreator
 from twisted.trial import unittest
-from twisted.python import log
-import sys
+
 
 class OneShotServer(Protocol):
 
@@ -41,7 +40,6 @@ class TelnetTestCase(unittest.TestCase):
         return cc.connectTCP('localhost', 2300)
 
     def test_normal_operation(self):
-        log.startLogging(sys.stdout)
         def cb(inst):
             d = inst.read_until('ello')
             d.addCallback(lambda res: self.assertEqual(res, 'hello'))
