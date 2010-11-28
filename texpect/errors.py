@@ -3,23 +3,23 @@
 '''
 
 
-class TExpectError(Exception):
+class ExpectError(Exception):
     """Base class for errors, specific to this module"""
     pass
 
-class OutOfSequenceError(TExpectError):
+class OutOfSequenceError(ExpectError):
     """Raised when an attempt to initialize a request is made, while there is
     a request pending.
     
     """
     pass
 
-class EOFReached(TExpectError):
+class EOFReached(ExpectError):
     """Raised when the connection is closed and no data is available."""
     pass
 
 
-class RequestFailed(TExpectError):
+class RequestFailed(ExpectError):
     """Request failed for whatever reason.
     
     @ivar data: Data, that was collected up to the point of failure

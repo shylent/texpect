@@ -45,7 +45,7 @@ class ReadLazy(Promise):
 
 
 class Expect(Promise):
-    """Base class for requests, that provide the 'expect' behaviour.
+    r"""Base class for requests, that provide the 'expect' behaviour.
 
     @ivar expecting: A list of patterns, that we are 'expecting' (sorry).
     @type expecting: C{list}
@@ -58,7 +58,7 @@ class Expect(Promise):
     """
 
     def __init__(self, expect, timeout=None, as_tuple=True):
-        """
+        r"""
         @param expect: List of patterns, that will be matched against the buffer
         @param timeout: Timeout in seconds for this request.
         @type timeout:C{int}
@@ -94,6 +94,17 @@ class ExpectMixin(object):
 
     It exposes a set of methods (so-called 'requests'), that each returns a L{Promise},
     which will be fired, when certain conditions (specific for each request) are met.
+
+    This class is meant to be used as a mixin (which should be obvious from its name)
+    in conjunction with another protocol. The resulting class should make sure,
+    that three conditions are met, otherwise L{ExpectMixin} will not function
+    properly:
+        - L{ExpectMixin.__init__} must be called
+        - Data must be fed to L{expectDataReceived} at some point, so that it
+          can be checked for possible matches
+        - L{ExpectMixin.connectionLost<connectionLost>} must be called at a
+          time, appropriate for the protocol that is being used (possibly, in the
+          protocol's C{connectionLost})
 
     @attention: Only one request may be active at a time. If this restriction is violated,
     the connection will be closed immediately. You may use multiple patterns, as an
@@ -155,15 +166,21 @@ class ExpectMixin(object):
         self.promise = None
         self.eof = False
 
-    def connectionLost(self, reason):
-        r"""Connection loss is handled here. When subclassing, one should take care
-        to call the parent's L{connectionLost} in order for the default connection
-        loss handling (and also L{twisted.conch.telnet.Telnet}'s connection loss
-        handling) to take place.
+    def connectionLost(self, reason=None):
+        r"""Connection loss is handled here. When using the mixin, one should
+        take care to call this at an appropriate time, depending on the actual
+        protocol, that is used.
+
+        @param reason: Reason for connection loss. Default: C{None}.
+        @type reason: L{Failure<twisted.python.failure.Failure>},
+        C{str} or C{NoneType}
 
         """
-        reason = getattr(reason, 'value', reason)
-        log.msg("Connection lost, reason: %s" % reason)
+        if reason is None:
+            log.msg("Connection lost")
+        else:
+            reason = getattr(reason, 'value', reason)
+            log.msg("Connection lost, reason: %s" % reason)
         self.eof = True
         buf = self._buf
         self._buf = ''
@@ -175,6 +192,8 @@ class ExpectMixin(object):
             promise.errback(Failure(RequestInterruptedByConnectionLoss(data=buf, promise=promise)))
 
     def expectDataReceived(self, data):
+        r"""Process incoming data, see if a match has occured."""
+
         if self.debug:
             log.msg('Received data: %r' % data)
         self._buf += data

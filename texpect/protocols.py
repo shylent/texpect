@@ -7,6 +7,10 @@ from twisted.internet.protocol import ProcessProtocol
 
 
 class TelnetExpect(telnet.Telnet, ExpectMixin):
+    """A ready-made combination of L{Telnet} and L{Expect}, that lets you
+    utilize L{Expect}'s functionality to automate the Telnet session.
+
+    """
 
     def __init__(self, debug=False, timeout=None, _reactor=None):
         ExpectMixin.__init__(self, debug=debug, timeout=timeout, _reactor=_reactor)
@@ -21,6 +25,10 @@ class TelnetExpect(telnet.Telnet, ExpectMixin):
 
 
 class ProcessExpect(ProcessProtocol, ExpectMixin):
+    """One of the possible ways to "talk" to a subprocess, writing to its stdin
+    and reading from stdout.
+
+    """
 
     def __init__(self, debug=False, timeout=None, _reactor=None):
         ExpectMixin.__init__(self, debug=debug, timeout=timeout, _reactor=_reactor)
